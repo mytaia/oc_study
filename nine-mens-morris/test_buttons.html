@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>按钮布局测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .test-container {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00f5ff;
+            font-size: 1.5rem;
+        }
+        
+        .screen-simulator {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #00f5ff;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            background: #0a0a0f;
+            margin-bottom: 20px;
+        }
+        
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .game-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .test-btn {
+            padding: 10px 20px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 8px;
+            color: #00f5ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .test-btn:hover {
+            background: rgba(0, 245, 255, 0.2);
+        }
+        
+        .info-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #00f5ff;
+        }
+        
+        .info-item {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .warning {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .success {
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .screen-simulator {
+                height: 500px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .screen-simulator {
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📱 游戏控制按钮布局测试</h1>
+        
+        <div class="screen-simulator">
+            <div class="screen-content">
+                <!-- 模拟棋盘区域 -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 60%; background: rgba(0, 245, 255, 0.05); border-radius: 10px; border: 1px solid rgba(0, 245, 255, 0.1);"></div>
+                
+                <!-- 游戏控制按钮 -->
+                <div class="game-controls" id="game-controls">
+                    <button class="control-btn">
+                        <span class="btn-icon">✦</span>
+                        <span class="btn-text">新游戏</span>
+                    </button>
+                    <button class="control-btn">
+                        <span class="btn-icon">🎨</span>
+                        <span class="btn-text">风格</span>
+                    </button>
+                    <button class="control-btn">
+                        <span class="btn-icon">↶</span>
+                        <span class="btn-text">悔棋</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-controls">
+            <button class="test-btn" onclick="testScreen(375)">375px (iPhone SE)</button>
+            <button class="test-btn" onclick="testScreen(414)">414px (iPhone 11)</button>
+            <button class="test-btn" onclick="testScreen(480)">480px (小屏手机)</button>
+            <button class="test-btn" onclick="testScreen(768)">768px (平板竖屏)</button>
+            <button class="test-btn" onclick="testActual()">实际尺寸</button>
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-item">当前屏幕宽度: <span id="screen-width">--</span>px</div>
+            <div class="info-item">按钮总宽度: <span id="buttons-width">--</span>px</div>
+            <div class="info-item">可用宽度: <span id="available-width">--</span>px</div>
+            <div class="info-item" id="layout-status">状态: 等待测试...</div>
+            <div class="info-item" id="solution-suggestion">建议: --</div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const gameControls = document.getElementById('game-controls');
+        const controlBtns = document.querySelectorAll('.control-btn');
+        const screenWidthEl = document.getElementById('screen-width');
+        const buttonsWidthEl = document.getElementById('buttons-width');
+        const availableWidthEl = document.getElementById('available-width');
+        const layoutStatusEl = document.getElementById('layout-status');
+        const solutionSuggestionEl = document.getElementById('solution-suggestion');
+        
+        // 计算按钮总宽度
+        function calculateButtonsWidth() {
+            let totalWidth = 0;
+            controlBtns.forEach(btn => {
+                const style = window.getComputedStyle(btn);
+                const marginLeft = parseFloat(style.marginLeft) || 0;
+                const marginRight = parseFloat(style.marginRight) || 0;
+                const width = btn.offsetWidth + marginLeft + marginRight;
+                totalWidth += width;
+            });
+            
+            // 加上gap
+            const controlsStyle = window.getComputedStyle(gameControls);
+            const gap = parseFloat(controlsStyle.gap) || 0;
+            totalWidth += gap * (controlBtns.length - 1);
+            
+            return totalWidth;
+        }
+        
+        // 更新布局信息
+        function updateLayoutInfo() {
+            const screenWidth = gameControls.parentElement.offsetWidth;
+            const buttonsWidth = calculateButtonsWidth();
+            const availableWidth = screenWidth - 40; // 减去左右边距
+            
+            screenWidthEl.textContent = screenWidth;
+            buttonsWidthEl.textContent = Math.round(buttonsWidth);
+            availableWidthEl.textContent = Math.round(availableWidth);
+            
+            if (buttonsWidth > availableWidth) {
+                layoutStatusEl.innerHTML = '<span class="warning">⚠️ 按钮换行（总宽度超过可用宽度）</span>';
+                solutionSuggestionEl.textContent = '需要减少按钮内边距、间距或字体大小';
+            } else {
+                layoutStatusEl.innerHTML = '<span class="success">✓ 按钮保持在一行</span>';
+                solutionSuggestionEl.textContent = '布局正常，无需调整';
+            }
+            
+            // 显示每个按钮的宽度
+            console.log('按钮宽度分析:');
+            controlBtns.forEach((btn, index) => {
+                const btnStyle = window.getComputedStyle(btn);
+                const paddingLeft = parseFloat(btnStyle.paddingLeft);
+                const paddingRight = parseFloat(btnStyle.paddingRight);
+                const contentWidth = btn.scrollWidth - paddingLeft - paddingRight;
+                console.log(`按钮${index + 1}: 总宽度=${btn.offsetWidth}px, 内容宽度=${contentWidth}px, padding=${paddingLeft + paddingRight}px`);
+            });
+        }
+        
+        // 测试不同屏幕尺寸
+        function testScreen(width) {
+            const simulator = document.querySelector('.screen-simulator');
+            simulator.style.width = width + 'px';
+            
+            // 给一点时间让布局更新
+            setTimeout(updateLayoutInfo, 100);
+        }
+        
+        // 测试实际尺寸
+        function testActual() {
+            const simulator = document.querySelector('.screen-simulator');
+            simulator.style.width = '100%';
+            
+            setTimeout(updateLayoutInfo, 100);
+        }
+        
+        // 应用优化方案
+        function applyOptimization() {
+            // 方案1: 减少padding
+            controlBtns.forEach(btn => {
+                btn.style.padding = '8px 12px';
+            });
+            
+            // 方案2: 减少gap
+            gameControls.style.gap = '8px';
+            
+            // 方案3: 减小字体
+            controlBtns.forEach(btn => {
+                btn.style.fontSize = '0.85rem';
+            });
+            
+            // 方案4: 隐藏图标（极端情况）
+            // const icons = document.querySelectorAll('.btn-icon');
+            // icons.forEach(icon => {
+            //     icon.style.display = 'none';
+            // });
+            
+            updateLayoutInfo();
+        }
+        
+        // 重置优化
+        function resetOptimization() {
+            controlBtns.forEach(btn => {
+                btn.style.padding = '';
+                btn.style.fontSize = '';
+            });
+            
+            gameControls.style.gap = '';
+            
+            // 显示图标
+            const icons = document.querySelectorAll('.btn-icon');
+            icons.forEach(icon => {
+                icon.style.display = '';
+            });
+            
+            updateLayoutInfo();
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            testActual();
+            
+            // 添加优化测试按钮
+            const testControls = document.querySelector('.test-controls');
+            const optimizeBtn = document.createElement('button');
+            optimizeBtn.className = 'test-btn';
+            optimizeBtn.textContent = '应用优化';
+            optimizeBtn.onclick = applyOptimization;
+            testControls.appendChild(optimizeBtn);
+            
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'test-btn';
+            resetBtn.textContent = '重置优化';
+            resetBtn.onclick = resetOptimization;
+            testControls.appendChild(resetBtn);
+            
+            // 监听窗口大小变化
+            window.addEventListener('resize', function() {
+                setTimeout(updateLayoutInfo, 100);
+            });
+        };
+    </script>
+</body>
+</html>

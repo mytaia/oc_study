@@ -31,6 +31,9 @@ class Renderer {
         this.colorsCache = null;
         this.lastTheme = null;
         
+        this.isPortrait = false;
+        this.pieceRadius = 22;
+        
         this.lastAIMovedPiece = null;
         this.aiRemovePosition = null;
         this.aiMoveFrom = null;
@@ -84,8 +87,23 @@ class Renderer {
         
         this.width = window.innerWidth;
         this.height = window.innerHeight;
+        this.isPortrait = this.height > this.width;
         
         this.calculateBoardPoints();
+        this.calculatePieceRadius();
+    }
+
+    calculatePieceRadius() {
+        const minDim = Math.min(this.width, this.height);
+        // 根据屏幕尺寸动态计算棋子半径
+        // 基础半径基于屏幕较小边的百分比，限制在15-25px之间
+        const baseRadius = Math.max(15, Math.min(25, minDim * 0.03));
+        this.pieceRadius = baseRadius;
+        
+        // 竖屏下进一步减小半径
+        if (this.isPortrait && this.width < 400) {
+            this.pieceRadius = Math.max(12, this.pieceRadius * 0.9);
+        }
     }
 
     updateColors() {
@@ -136,11 +154,44 @@ class Renderer {
 
     calculateBoardPoints() {
         const minDim = Math.min(this.width, this.height);
-        const boardSize = minDim * 0.65;
-        const centerX = this.width / 2;
-        const centerY = this.height / 2;
-
-        const sizes = [boardSize, boardSize * 0.65, boardSize * 0.3];
+        let boardSize, centerX, centerY;
+        
+        if (this.isPortrait) {
+            // 竖屏布局：棋盘大小基于宽度，为顶部UI留出空间
+            const topMargin = this.height * 0.15; // 顶部留出15%给游戏信息区域
+            const bottomMargin = this.height * 0.15; // 底部留出15%给控制按钮
+            const availableHeight = this.height - topMargin - bottomMargin;
+            
+            // 棋盘大小取宽度和可用高度的较小值
+            boardSize = Math.min(this.width * 0.75, availableHeight * 0.8);
+            centerX = this.width / 2;
+            centerY = topMargin + (availableHeight / 2);
+        } else {
+            // 横屏布局：使用原有逻辑
+            boardSize = minDim * 0.65;
+            centerX = this.width / 2;
+            centerY = this.height / 2;
+        }
+        
+        // 调整内环大小，确保棋子不重叠
+        // 内环从30%增加到40%，中环从65%调整到70%
+        const sizes = [boardSize, boardSize * 0.7, boardSize * 0.4];
+        
+        // 检查并确保内环有足够间距
+        const minSpacing = this.pieceRadius * 2.5; // 最小间距为2.5倍棋子半径
+        const actualSpacing = sizes[1] - sizes[2]; // 中环和内环的间距
+        
+        if (actualSpacing < minSpacing) {
+            // 调整内环大小，确保足够间距
+            sizes[2] = sizes[1] - minSpacing;
+            // 如果调整后内环太小，等比缩小所有环
+            if (sizes[2] < boardSize * 0.2) {
+                const scale = (boardSize * 0.2) / sizes[2];
+                sizes[0] *= scale;
+                sizes[1] *= scale;
+                sizes[2] = boardSize * 0.2;
+            }
+        }
 
         this.boardPoints = [];
         
@@ -216,7 +267,9 @@ class Renderer {
     }
 
     findNearestPoint(x, y) {
-        const threshold = 30;
+        // 根据屏幕尺寸动态调整阈值
+        const baseThreshold = Math.max(25, Math.min(40, this.width * 0.05));
+        const threshold = this.isPortrait ? baseThreshold * 1.2 : baseThreshold;
         
         for (const point of this.boardPoints) {
             const dx = point.x - x;
@@ -376,7 +429,7 @@ class Renderer {
         const darkColor = player === 1 ? this.colors.player1Dark : this.colors.player2Dark;
         const glowColor = player === 1 ? this.colors.player1Glow : this.colors.player2Glow;
         
-        const baseRadius = 22;
+        const baseRadius = this.pieceRadius;
         const radius = isSelected ? baseRadius * 1.2 : baseRadius;
         
         if (isSelected || isLastAIMoved) {
@@ -759,7 +812,7 @@ class Renderer {
         const ctx = this.ctx;
         const color = player === 1 ? this.colors.player1 : this.colors.player2;
         const darkColor = player === 1 ? this.colors.player1Dark : this.colors.player2Dark;
-        const radius = 22;
+        const radius = this.pieceRadius;
         
         // 简化的哑光磨砂效果用于动画
         const mainGradient = ctx.createRadialGradient(
