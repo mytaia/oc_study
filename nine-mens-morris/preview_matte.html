@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哑光磨砂效果预览</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+        }
+        
+        .preview-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #00f5ff;
+            border-bottom: 2px solid rgba(0, 245, 255, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .pieces-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .piece-container {
+            text-align: center;
+        }
+        
+        .piece-label {
+            margin-top: 10px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        canvas {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            color: #00f5ff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 245, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .effect-description {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #00f5ff;
+        }
+        
+        .effect-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .effect-list li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .effect-list li:before {
+            content: "✓";
+            color: #00ff88;
+            position: absolute;
+            left: 0;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .pieces-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 成三棋 - 哑光磨砂效果预览</h1>
+        
+        <div class="preview-section">
+            <h2 class="section-title">磨砂棋子效果</h2>
+            <div class="canvas-container">
+                <canvas id="previewCanvas" width="400" height="200"></canvas>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="drawPlayer1()">玩家1 (蓝色)</button>
+                <button class="control-btn" onclick="drawPlayer2()">玩家2 (粉色)</button>
+                <button class="control-btn" onclick="drawSelected()">选中状态</button>
+                <button class="control-btn" onclick="drawAll()">显示所有</button>
+            </div>
+            
+            <div class="effect-description">
+                <h3>哑光磨砂效果特点：</h3>
+                <ul class="effect-list">
+                    <li>柔和的光线反射，无强烈高光</li>
+                    <li>均匀的表面质感</li>
+                    <li>磨砂纹理效果</li>
+                    <li>柔和的阴影过渡</li>
+                    <li>微弱的表面光泽</li>
+                    <li>增加立体感的边缘阴影</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h2 class="section-title">不同尺寸预览</h2>
+            <div class="pieces-grid">
+                <div class="piece-container">
+                    <canvas id="piece1" width="100" height="100"></canvas>
+                    <div class="piece-label">正常尺寸</div>
+                </div>
+                <div class="piece-container">
+                    <canvas id="piece2" width="120" height="120"></canvas>
+                    <div class="piece-label">选中状态 (放大)</div>
+                </div>
+                <div class="piece-container">
+                    <canvas id="piece3" width="80" height="80"></canvas>
+                    <div class="piece-label">小尺寸</div>
+                </div>
+                <div class="piece-container">
+                    <canvas id="piece4" width="100" height="100"></canvas>
+                    <div class="piece-label">玩家2颜色</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h2 class="section-title">效果对比</h2>
+            <div class="comparison">
+                <div>
+                    <h3 style="color: #00f5ff;">哑光磨砂效果</h3>
+                    <div class="canvas-container">
+                        <canvas id="matteCanvas" width="150" height="150"></canvas>
+                    </div>
+                    <p>特点：柔和、均匀、质感丰富</p>
+                </div>
+                <div>
+                    <h3 style="color: #ff00ff;">原水晶效果</h3>
+                    <div class="canvas-container">
+                        <canvas id="crystalCanvas" width="150" height="150"></canvas>
+                    </div>
+                    <p>特点：闪亮、透明、反光强烈</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 颜色定义
+        const colors = {
+            player1: '#00f5ff',
+            player1Dark: '#00a8b3',
+            player2: '#ff00ff',
+            player2Dark: '#b300b3'
+        };
+        
+        // 调整颜色亮度
+        function adjustColor(hex, amount) {
+            let color = hex.replace('#', '');
+            if (color.length === 3) {
+                color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+            }
+            let r = parseInt(color.substring(0, 2), 16);
+            let g = parseInt(color.substring(2, 4), 16);
+            let b = parseInt(color.substring(4, 6), 16);
+            r = Math.max(0, Math.min(255, r + amount));
+            g = Math.max(0, Math.min(255, g + amount));
+            b = Math.max(0, Math.min(255, b + amount));
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        // 绘制哑光磨砂棋子
+        function drawMattePiece(ctx, x, y, player, isSelected = false) {
+            const color = player === 1 ? colors.player1 : colors.player2;
+            const darkColor = player === 1 ? colors.player1Dark : colors.player2Dark;
+            
+            const baseRadius = 22;
+            const radius = isSelected ? baseRadius * 1.2 : baseRadius;
+            
+            if (isSelected) {
+                ctx.shadowColor = player === 1 ? 'rgba(0, 245, 255, 0.6)' : 'rgba(255, 0, 255, 0.6)';
+                ctx.shadowBlur = 20;
+            }
+            
+            // 1. 哑光主体
+            const mainGradient = ctx.createRadialGradient(
+                x - radius * 0.15, y - radius * 0.15, 0,
+                x, y, radius
+            );
+            mainGradient.addColorStop(0, adjustColor(color, 40) + ', 0.8)');
+            mainGradient.addColorStop(0.3, color + ', 0.9)');
+            mainGradient.addColorStop(0.7, color);
+            mainGradient.addColorStop(1, darkColor);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = mainGradient;
+            ctx.fill();
+            
+            // 2. 磨砂纹理效果
+            ctx.save();
+            ctx.globalAlpha = 0.15;
+            
+            const textureCount = 8;
+            for (let i = 0; i < textureCount; i++) {
+                const angle = Math.PI * 2 * i / textureCount;
+                const textureX = x + Math.cos(angle) * radius * 0.6;
+                const textureY = y + Math.sin(angle) * radius * 0.6;
+                const textureRadius = radius * 0.08;
+                
+                const textureGradient = ctx.createRadialGradient(
+                    textureX - textureRadius * 0.5, textureY - textureRadius * 0.5, 0,
+                    textureX, textureY, textureRadius
+                );
+                textureGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                textureGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.beginPath();
+                ctx.arc(textureX, textureY, textureRadius, 0, Math.PI * 2);
+                ctx.fillStyle = textureGradient;
+                ctx.fill();
+            }
+            ctx.restore();
+            
+            // 3. 柔和高光
+            const highlightX = x - radius * 0.25;
+            const highlightY = y - radius * 0.25;
+            const highlightRadius = radius * 0.2;
+            
+            const highlightGradient = ctx.createRadialGradient(
+                highlightX - highlightRadius * 0.3, highlightY - highlightRadius * 0.3, 0,
+                highlightX, highlightY, highlightRadius
+            );
+            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            highlightGradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.1)');
+            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.beginPath();
+            ctx.arc(highlightX, highlightY, highlightRadius, 0, Math.PI * 2);
+            ctx.fillStyle = highlightGradient;
+            ctx.fill();
+            
+            // 4. 边缘阴影
+            ctx.beginPath();
+            ctx.arc(x, y, radius + 1, 0, Math.PI * 2);
+            ctx.strokeStyle = darkColor.replace(')', ', 0.3)').replace('rgb', 'rgba');
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0;
+        }
+        
+        // 绘制原水晶效果（用于对比）
+        function drawCrystalPiece(ctx, x, y, player) {
+            const color = player === 1 ? colors.player1 : colors.player2;
+            const darkColor = player === 1 ? colors.player1Dark : colors.player2Dark;
+            const radius = 22;
+            
+            // 水晶主体
+            const mainGradient = ctx.createRadialGradient(
+                x - radius * 0.3, y - radius * 0.3, 0,
+                x, y, radius
+            );
+            mainGradient.addColorStop(0, '#ffffff');
+            mainGradient.addColorStop(0.3, color);
+            mainGradient.addColorStop(1, darkColor);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = mainGradient;
+            ctx.fill();
+            
+            // 强烈高光
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.25, y - radius * 0.25, radius * 0.2, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fill();
+            
+            // 发光边缘
+            ctx.beginPath();
+            ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
+            ctx.strokeStyle = color + '99';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        // 初始化画布
+        function initCanvas(canvasId, width, height) {
+            const canvas = document.getElementById(canvasId);
+            canvas.width = width;
+            canvas.height = height;
+            return canvas.getContext('2d');
+        }
+        
+        // 清空画布
+        function clearCanvas(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            // 添加背景
+            ctx.fillStyle = 'rgba(30, 30, 46, 0.5)';
+            ctx.fillRect(0, 0, width, height);
+        }
+        
+        // 绘制预览
+        function drawPreview() {
+            const ctx = initCanvas('previewCanvas', 400, 200);
+            clearCanvas(ctx, 400, 200);
+            
+            // 绘制两个棋子
+            drawMattePiece(ctx, 150, 100, 1, false);
+            drawMattePiece(ctx, 250, 100, 2, false);
+        }
+        
+        // 绘制单个棋子
+        function drawPlayer1() {
+            const ctx = initCanvas('previewCanvas', 400, 200);
+            clearCanvas(ctx, 400, 200);
+            drawMattePiece(ctx, 200, 100, 1, false);
+        }
+        
+        function drawPlayer2() {
+            const ctx = initCanvas('previewCanvas', 400, 200);
+            clearCanvas(ctx, 400, 200);
+            drawMattePiece(ctx, 200, 100, 2, false);
+        }
+        
+        function drawSelected() {
+            const ctx = initCanvas('previewCanvas', 400, 200);
+            clearCanvas(ctx, 400, 200);
+            drawMattePiece(ctx, 200, 100, 1, true);
+        }
+        
+        function drawAll() {
+            drawPreview();
+        }
+        
+        // 初始化小尺寸预览
+        function initSmallPreviews() {
+            // 正常尺寸
+            const ctx1 = initCanvas('piece1', 100, 100);
+            clearCanvas(ctx1, 100, 100);
+            drawMattePiece(ctx1, 50, 50, 1, false);
+            
+            // 选中状态
+            const ctx2 = initCanvas('piece2', 120, 120);
+            clearCanvas(ctx2, 120, 120);
+            drawMattePiece(ctx2, 60, 60, 1, true);
+            
+            // 小尺寸
+            const ctx3 = initCanvas('piece3', 80, 80);
+            clearCanvas(ctx3, 80, 80);
+            drawMattePiece(ctx3, 40, 40, 1, false);
+            
+            // 玩家2
+            const ctx4 = initCanvas('piece4', 100, 100);
+            clearCanvas(ctx4, 100, 100);
+            drawMattePiece(ctx4, 50, 50, 2, false);
+        }
+        
+        // 初始化对比
+        function initComparison() {
+            // 哑光效果
+            const matteCtx = initCanvas('matteCanvas', 150, 150);
+            clearCanvas(matteCtx, 150, 150);
+            drawMattePiece(matteCtx, 75, 75, 1, false);
+            
+            // 水晶效果
+            const crystalCtx = initCanvas('crystalCanvas', 150, 150);
+            clearCanvas(crystalCtx, 150, 150);
+            drawCrystalPiece(crystalCtx, 75, 75, 1);
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            drawPreview();
+            initSmallPreviews();
+            initComparison();
+        };
+    </script>
+</body>
+</html>

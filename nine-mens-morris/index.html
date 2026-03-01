@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>成三棋 - 未来之战</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="game-canvas"></canvas>
+    
+    <div class="ui-overlay">
+        <div class="game-info" id="game-info">
+            <div class="game-title-bar">
+                <span class="title-text">成三棋</span>
+            </div>
+            
+            <div class="player-card player-1 active" id="player-1-card">
+                <div class="player-main">
+                    <div class="player-icon"></div>
+                    <span class="player-name">玩家</span>
+                </div>
+                <div class="player-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">待落</span>
+                        <span class="stat-value" id="p1-to-place">9</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">棋盘</span>
+                        <span class="stat-value" id="p1-on-board">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-status" id="game-status">
+                <span class="phase-text">放置阶段</span>
+                <span class="turn-text" id="turn-text">请落子</span>
+            </div>
+            
+            <div class="player-card player-2" id="player-2-card">
+                <div class="player-main">
+                    <div class="player-icon"></div>
+                    <span class="player-name">AI</span>
+                </div>
+                <div class="player-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">待落</span>
+                        <span class="stat-value" id="p2-to-place">9</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">棋盘</span>
+                        <span class="stat-value" id="p2-on-board">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-controls">
+            <button class="control-btn" id="btn-new-game">
+                <span class="btn-icon">✦</span>
+                <span class="btn-text">新游戏</span>
+            </button>
+            <button class="control-btn" id="btn-theme">
+                <span class="btn-icon">🎨</span>
+                <span class="btn-text">风格</span>
+            </button>
+            <button class="control-btn" id="btn-undo">
+                <span class="btn-icon">↶</span>
+                <span class="btn-text">悔棋</span>
+            </button>
+        </div>
+        
+        <div class="firsthand-menu" id="firsthand-menu">
+            <div class="start-menu-header">
+                <div class="menu-logo">⚔️</div>
+                <div class="menu-title-main">九子棋</div>
+                <div class="menu-subtitle">FUTURISTIC MORRIS</div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="section-label">
+                    <span class="label-icon">⚡</span>
+                    <span>难度选择</span>
+                </div>
+                <div class="difficulty-options">
+                    <button class="diff-btn" data-level="easy">
+                        <span class="diff-icon">🤖</span>
+                        <span class="diff-name">简单</span>
+                        <div class="diff-bar"><div class="diff-fill" style="width: 30%"></div></div>
+                    </button>
+                    <button class="diff-btn" data-level="medium">
+                        <span class="diff-icon">🧠</span>
+                        <span class="diff-name">中等</span>
+                        <div class="diff-bar"><div class="diff-fill" style="width: 60%"></div></div>
+                    </button>
+                    <button class="diff-btn selected" data-level="hard">
+                        <span class="diff-icon">💀</span>
+                        <span class="diff-name">困难</span>
+                        <div class="diff-bar"><div class="diff-fill" style="width: 100%"></div></div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="section-label">
+                    <span class="label-icon">🎮</span>
+                    <span>先手选择</span>
+                </div>
+                <div class="firsthand-options">
+                    <button class="firsthand-btn selected" data-choice="player">
+                        <span class="btn-icon">👤</span>
+                        <span>我先手</span>
+                    </button>
+                    <button class="firsthand-btn" data-choice="ai">
+                        <span class="btn-icon">🤖</span>
+                        <span>AI先手</span>
+                    </button>
+                </div>
+            </div>
+            
+            <button class="start-btn" id="btn-confirm-first">
+                <span class="btn-glow"></span>
+                <span class="btn-text">开始游戏</span>
+            </button>
+        </div>
+        
+        <div class="theme-menu" id="theme-menu">
+            <div class="menu-title">选择风格</div>
+            <button class="theme-btn selected" data-theme="cyberpunk">赛博朋克</button>
+            <button class="theme-btn" data-theme="blackgold">黑金</button>
+            <button class="theme-btn" data-theme="blackwhite">黑白调</button>
+            <button class="theme-btn" data-theme="chinese">中国风</button>
+        </div>
+        
+        <div class="winner-overlay" id="winner-overlay">
+            <div class="winner-content">
+                <div class="winner-title" id="winner-title">胜利!</div>
+                <div class="winner-subtitle" id="winner-subtitle">你击败了AI</div>
+                <button class="restart-btn" id="btn-restart">再来一局</button>
+            </div>
+        </div>
+        
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">AI 思考中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mobile-hint" id="mobile-hint">
+        <span>👆 点击空位落子</span>
+    </div>
+
+    <script src="js/game.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
