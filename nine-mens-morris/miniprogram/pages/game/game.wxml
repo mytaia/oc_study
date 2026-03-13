@@ -1,0 +1,130 @@
+﻿<!-- pages/game/game.wxml -->
+<view class="game-container">
+  <canvas type="2d" id="bg-canvas" class="bg-canvas"></canvas>
+  <canvas
+    type="2d"
+    id="game-canvas"
+    class="game-canvas"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+  ></canvas>
+
+  <view class="ui-layer">
+    <view class="game-info">
+      <view class="game-title-bar">
+        <text class="title-text">成三棋</text>
+      </view>
+
+      <view class="game-info-row">
+        <view class="player-card player-1 {{currentPlayer === 1 ? 'active' : ''}}">
+          <view class="player-main">
+            <view class="player-icon p1-icon"></view>
+            <text class="player-name">玩家</text>
+          </view>
+          <view class="player-stats">
+            <view class="stat-box">
+              <text class="stat-label">待落</text>
+              <text class="stat-value">{{p1ToPlace}}</text>
+            </view>
+            <view class="stat-box">
+              <text class="stat-label">棋盘</text>
+              <text class="stat-value">{{p1OnBoard}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="game-status">
+          <text class="phase-text">{{phaseText}}</text>
+          <text class="turn-text">{{turnText}}</text>
+        </view>
+
+        <view class="player-card player-2 {{currentPlayer === 2 ? 'active' : ''}}">
+          <view class="player-main">
+            <view class="player-icon p2-icon"></view>
+            <text class="player-name">AI</text>
+          </view>
+          <view class="player-stats">
+            <view class="stat-box">
+              <text class="stat-label">待落</text>
+              <text class="stat-value">{{p2ToPlace}}</text>
+            </view>
+            <view class="stat-box">
+              <text class="stat-label">棋盘</text>
+              <text class="stat-value">{{p2OnBoard}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="game-controls">
+      <button class="control-btn" bindtap="onNewGame">
+        <text class="btn-icon">&#x21bb;</text>
+        <text class="btn-text">新游戏</text>
+      </button>
+      <button class="control-btn" bindtap="onThemeMenu">
+        <text class="btn-icon">&#x2726;</text>
+        <text class="btn-text">风格</text>
+      </button>
+      <button class="control-btn" bindtap="onUndo">
+        <text class="btn-icon">&#x21b6;</text>
+        <text class="btn-text">悔棋</text>
+      </button>
+    </view>
+
+    <view class="firsthand-menu {{showFirsthandMenu ? 'active' : ''}}">
+      <view class="start-menu-header">
+        <view class="menu-title-main">成三棋</view>
+      </view>
+
+      <view class="menu-section">
+        <view class="section-label">难度选择</view>
+        <view class="difficulty-options">
+          <button class="diff-btn {{difficulty === 'easy' ? 'selected' : ''}}" bindtap="onSelectDifficulty" data-level="easy">简单</button>
+          <button class="diff-btn {{difficulty === 'medium' ? 'selected' : ''}}" bindtap="onSelectDifficulty" data-level="medium">中等</button>
+          <button class="diff-btn {{difficulty === 'hard' ? 'selected' : ''}}" bindtap="onSelectDifficulty" data-level="hard">困难</button>
+        </view>
+      </view>
+
+      <view class="menu-section">
+        <view class="section-label">先手选择</view>
+        <view class="firsthand-options">
+          <button class="firsthand-btn {{firsthand === 'player' ? 'selected' : ''}}" bindtap="onSelectFirsthand" data-choice="player">我先手</button>
+          <button class="firsthand-btn {{firsthand === 'ai' ? 'selected' : ''}}" bindtap="onSelectFirsthand" data-choice="ai">AI先手</button>
+        </view>
+      </view>
+
+      <button class="start-btn" bindtap="onConfirmStart">
+        <text class="btn-icon start-icon">&#x25b6;</text>
+        <text class="btn-text">开始游戏</text>
+      </button>
+    </view>
+
+    <view class="theme-menu {{showThemeMenu ? 'active' : ''}}">
+      <view class="menu-title">选择风格</view>
+      <button class="theme-btn {{theme === 'cyberpunk' ? 'selected' : ''}}" bindtap="onSelectTheme" data-theme="cyberpunk">赛博朋克</button>
+      <button class="theme-btn {{theme === 'blackgold' ? 'selected' : ''}}" bindtap="onSelectTheme" data-theme="blackgold">黑金</button>
+      <button class="theme-btn {{theme === 'blackwhite' ? 'selected' : ''}}" bindtap="onSelectTheme" data-theme="blackwhite">黑白调</button>
+      <button class="theme-btn {{theme === 'chinese' ? 'selected' : ''}}" bindtap="onSelectTheme" data-theme="chinese">中国风</button>
+    </view>
+
+    <view class="winner-overlay {{showWinner ? 'active' : ''}}">
+      <view class="winner-content">
+        <view class="winner-title">{{winnerTitle}}</view>
+        <view class="winner-subtitle">{{winnerSubtitle}}</view>
+        <button class="restart-btn" bindtap="onRestart">
+          <text class="btn-icon restart-icon">&#x27f2;</text>
+          <text class="btn-text">再来一局</text>
+        </button>
+      </view>
+    </view>
+
+    <view class="loading-overlay {{showLoading ? 'active' : ''}}">
+      <view class="loading-content">
+        <view class="loading-spinner"></view>
+        <view class="loading-text">AI 思考中...</view>
+      </view>
+    </view>
+  </view>
+</view>

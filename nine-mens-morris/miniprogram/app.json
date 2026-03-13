@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/game/game"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#0a0a0f",
+    "navigationBarTitleText": "成三棋",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0a0a0f"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
