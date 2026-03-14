@@ -138,7 +138,7 @@ page {
 }
 
 .player-name {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 .player-stats {
@@ -156,12 +156,12 @@ page {
 }
 
 .stat-label {
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.6);
 }
 
 .stat-value {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: bold;
 }
 
@@ -177,12 +177,12 @@ page {
 }
 
 .phase-text {
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   color: rgba(255, 255, 255, 0.6);
 }
 
 .turn-text {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   color: #00ff88;
 }
 
@@ -219,15 +219,24 @@ page {
   box-sizing: border-box;
 }
 
+.control-btn .btn-text,
+.start-btn .btn-text,
+.restart-btn .btn-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 .control-btn::after {
   border: none;
 }
 
 .btn-icon {
-  font-size: 0.95rem;
+  display: inline-block;
+  font-size: 1rem;
   line-height: 1;
-  margin-right: 4px;
+  margin-right: 6px;
   opacity: 0.95;
+  text-align: center;
 }
 
 .firsthand-menu,
@@ -352,6 +361,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 180px;
   padding: 15px 40px;
   background: linear-gradient(135deg, #00f5ff, #ff00ff);
   border: none;
@@ -406,6 +416,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 160px;
   padding: 12px 30px;
   background: linear-gradient(135deg, #00f5ff, #ff00ff);
   border: none;
@@ -439,7 +450,7 @@ page {
 
 .start-icon,
 .restart-icon {
-  font-size: 1rem;
+  font-size: 1.15rem;
   margin-right: 6px;
 }
 

@@ -54,8 +54,9 @@ class AI {
         this.difficulty = difficulty;
         this.tt = new TranspositionTable();
         this.nodesEvaluated = 0;
-        this.maxDepth = difficulty === 'easy' ? 2 : difficulty === 'medium' ? 4 : 10;
-        this.timeLimit = 4000;
+        const config = this.getDifficultyConfig(difficulty);
+        this.maxDepth = config.maxDepth;
+        this.timeLimit = config.timeLimit;
         this.startTime = 0;
         this.bestMove = null;
         this.stopped = false;
@@ -63,8 +64,22 @@ class AI {
 
     setDifficulty(difficulty) {
         this.difficulty = difficulty;
-        this.maxDepth = difficulty === 'easy' ? 2 : difficulty === 'medium' ? 4 : 10;
+        const config = this.getDifficultyConfig(difficulty);
+        this.maxDepth = config.maxDepth;
+        this.timeLimit = config.timeLimit;
         this.tt.clear();
+    }
+
+    getDifficultyConfig(difficulty) {
+        if (difficulty === 'easy') {
+            return { maxDepth: 2, timeLimit: 250 };
+        }
+
+        if (difficulty === 'medium') {
+            return { maxDepth: 3, timeLimit: 600 };
+        }
+
+        return { maxDepth: 5, timeLimit: 1200 };
     }
 
     makeMove(game) {

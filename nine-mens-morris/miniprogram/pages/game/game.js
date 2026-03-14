@@ -8,6 +8,13 @@ const PLAYER_2 = 2;
 
 Page({
   data: {
+    icons: {
+      newGame: '↻',
+      theme: '✦',
+      undo: '↶',
+      start: '▶',
+      restart: '⟲'
+    },
     currentPlayer: 1,
     p1ToPlace: 9,
     p2ToPlace: 9,
@@ -33,6 +40,12 @@ Page({
   onLoad() {
     console.log('Game page loaded');
     try {
+      this.timeoutIds = new Set();
+      this.intervalIds = new Set();
+      const savedTheme = wx.getStorageSync('gameTheme');
+      if (savedTheme) {
+        this.setData({ theme: savedTheme });
+      }
       this.initGame();
     } catch (e) {
       console.error('Init game error:', e);
@@ -44,11 +57,37 @@ Page({
     this.initCanvas();
   },
 
+  onUnload() {
+    this.clearAsyncTasks();
+  },
+
   initGame() {
     this.game = new Game();
     this.ai = new AI(this.data.difficulty);
     this.isPlayerTurn = true;
     this.isProcessing = false;
+  },
+
+  scheduleTimeout(callback, delay) {
+    const id = setTimeout(() => {
+      this.timeoutIds.delete(id);
+      callback();
+    }, delay);
+    this.timeoutIds.add(id);
+    return id;
+  },
+
+  scheduleInterval(callback, delay) {
+    const id = setInterval(callback, delay);
+    this.intervalIds.add(id);
+    return id;
+  },
+
+  clearAsyncTasks() {
+    this.timeoutIds.forEach((id) => clearTimeout(id));
+    this.intervalIds.forEach((id) => clearInterval(id));
+    this.timeoutIds.clear();
+    this.intervalIds.clear();
   },
 
   initCanvas() {
@@ -63,7 +102,7 @@ Page({
       console.log('Canvas init:', width, height, dpr);
 
       // 延迟一点，确保页面节点已准备完成
-      setTimeout(function() {
+      that.scheduleTimeout(function() {
         that.initCanvases(width, height, dpr);
       }, 100);
     } catch (e) {
@@ -228,7 +267,7 @@ Page({
       
       if (this.game.state.millFormed) {
         this.setData({ turnText: '选择要移除的棋子' });
-        setTimeout(() => {
+        this.scheduleTimeout(() => {
           this.renderer.clearCurrentMills();
         }, 1500);
         return;
@@ -257,6 +296,10 @@ Page({
       const from = this.game.state.selectedPiece;
       const applyMove = () => this.applyPlayerMove(from, index);
 
+      if (!this.game.isValidMove(from, index)) {
+        return;
+      }
+
       if (this.renderer && typeof this.renderer.startMoveAnimation === 'function') {
         this.isProcessing = true;
         this.animateMove(from, index, 1, applyMove, false);
@@ -277,7 +320,7 @@ Page({
     
     if (this.game.state.millFormed) {
       this.setData({ turnText: '选择要移除的棋子' });
-      setTimeout(() => {
+      this.scheduleTimeout(() => {
         this.renderer.clearCurrentMills();
       }, 1500);
       return;
@@ -318,7 +361,7 @@ Page({
       showLoading: true
     });
     
-    setTimeout(() => {
+    this.scheduleTimeout(() => {
       this.makeAIMove();
     }, 500);
   },
@@ -356,7 +399,7 @@ Page({
         this.game.placePiece(move.to);
         if (this.renderer) {
           this.renderer.setLastAIMovedPiece(move.to);
-          setTimeout(() => {
+          this.scheduleTimeout(() => {
             if (this.renderer) {
               this.renderer.clearLastAIMovedPiece();
               this.renderer.draw(this.game);
@@ -368,7 +411,7 @@ Page({
         if (this.renderer) {
           this.renderer.setLastAIMovedPiece(move.to);
           this.renderer.clearAIMovePositions();
-          setTimeout(() => {
+          this.scheduleTimeout(() => {
             if (this.renderer) {
               this.renderer.clearLastAIMovedPiece();
               this.renderer.draw(this.game);
@@ -400,9 +443,10 @@ Page({
     }
     this.renderer.startMoveAnimation(from, to, player, 360);
 
-    const timer = setInterval(() => {
+    const timer = this.scheduleInterval(() => {
       if (!this.renderer || !this.game) {
         clearInterval(timer);
+        this.intervalIds.delete(timer);
         onDone();
         return;
       }
@@ -411,6 +455,7 @@ Page({
 
       if (!this.renderer.hasMoveAnimation()) {
         clearInterval(timer);
+        this.intervalIds.delete(timer);
         onDone();
       }
     }, 16);
@@ -426,7 +471,7 @@ Page({
         turnText: 'AI成三! 准备吃子...'
       });
       
-      setTimeout(() => {
+      this.scheduleTimeout(() => {
         this.game.removePiece(posToRemove);
         
         if (this.game.gameOver) {
@@ -501,11 +546,13 @@ Page({
   },
 
   onNewGame() {
+    this.clearAsyncTasks();
     this.game.reset();
     this.ai.tt.clear();
     if (this.renderer) {
       this.renderer.clearAIMovePositions();
       this.renderer.clearLastAIMovedPiece();
+      this.renderer.clearCurrentMills();
     }
     
     this.isPlayerTurn = true;
@@ -519,8 +566,14 @@ Page({
       p1ToPlace: 9,
       p2ToPlace: 9,
       p1OnBoard: 0,
-      p2OnBoard: 0
+      p2OnBoard: 0,
+      phaseText: '放置阶段',
+      turnText: '请落子'
     });
+
+    if (this.renderer) {
+      this.renderer.draw(this.game);
+    }
   },
 
   onThemeMenu() {
@@ -531,10 +584,30 @@ Page({
 
   onUndo() {
     if (this.isProcessing || !this.isPlayerTurn) return;
-    const undone = this.game.undo();
-    if (undone) {
-      this.updateUI();
+
+    let undone = this.game.undo();
+    let safety = 0;
+
+    while (
+      undone &&
+      this.game.state.history.length > 0 &&
+      (this.game.state.currentPlayer !== PLAYER_1 || this.game.state.millFormed) &&
+      safety < 8
+    ) {
+      undone = this.game.undo();
+      safety++;
     }
+
+    if (!undone && safety === 0) return;
+
+    this.clearAsyncTasks();
+    this.isPlayerTurn = this.game.state.currentPlayer === PLAYER_1;
+    this.isProcessing = false;
+    this.setData({
+      showLoading: false,
+      showWinner: false
+    });
+    this.updateUI();
   },
 
   onRestart() {
@@ -564,7 +637,7 @@ Page({
       });
       this.isProcessing = true;
       
-      setTimeout(() => {
+      this.scheduleTimeout(() => {
         this.makeAIMove();
       }, 500);
     } else {

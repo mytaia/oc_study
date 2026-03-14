@@ -244,17 +244,12 @@ class Renderer {
     const ctx = this.ctx;
     const color = player === PLAYER_1 ? this.colors.player1 : this.colors.player2;
     const dark = player === PLAYER_1 ? this.colors.player1Dark : this.colors.player2Dark;
-    const r = isSelected ? this.pieceRadius * 1.15 : this.pieceRadius;
+    const r = isSelected ? this.pieceRadius * 1.06 : this.pieceRadius;
 
     const g = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x, y, r);
     g.addColorStop(0, '#ffffffaa');
     g.addColorStop(0.2, color + 'ee');
     g.addColorStop(1, dark);
-
-    if (isSelected) {
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 16;
-    }
 
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -264,12 +259,10 @@ class Renderer {
     if (isSelected) {
       ctx.beginPath();
       ctx.arc(x, y, r + 6, 0, Math.PI * 2);
-      ctx.strokeStyle = `${color}cc`;
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = `${color}88`;
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
-
-    ctx.shadowBlur = 0;
   }
 
   drawMovingPiece() {
@@ -320,20 +313,6 @@ class Renderer {
         ctx.stroke();
       }
       return;
-    }
-
-    if (game.getCurrentPhase() === PHASE_MOVING) {
-      const selected = game.getSelectedPiece();
-      if (selected !== null) {
-        for (const to of ADJACENT[selected]) {
-          if (game.state.board[to] !== 0 || !this.boardPoints[to]) continue;
-          const p = this.boardPoints[to];
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 16, 0, Math.PI * 2);
-          ctx.fillStyle = this.colors.validMove;
-          ctx.fill();
-        }
-      }
     }
 
     if (this.aiMoveFrom !== null && this.aiMoveTo !== null) {

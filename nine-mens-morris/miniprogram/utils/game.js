@@ -46,7 +46,7 @@ class GameState {
         this.blockedPositions = [];
     }
 
-    clone() {
+    clone(includeHistory = false) {
         const newState = new GameState();
         newState.board = [...this.board];
         newState.player1Pieces = this.player1Pieces;
@@ -55,11 +55,11 @@ class GameState {
         newState.player2PiecesOnBoard = this.player2PiecesOnBoard;
         newState.currentPlayer = this.currentPlayer;
         newState.phase = this.phase;
-        newState.history = [...this.history];
         newState.selectedPiece = this.selectedPiece;
         newState.millFormed = this.millFormed;
         newState.removePiece = this.removePiece;
         newState.blockedPositions = [...this.blockedPositions];
+        newState.history = includeHistory ? [...this.history] : [];
         return newState;
     }
 }
@@ -77,6 +77,14 @@ class Game {
         this.state = new GameState();
         this.gameOver = false;
         this.winner = null;
+    }
+
+    pushHistorySnapshot() {
+        this.state.history.push({
+            state: this.state.clone(false),
+            gameOver: this.gameOver,
+            winner: this.winner
+        });
     }
 
     getCurrentPlayer() {
@@ -235,6 +243,8 @@ class Game {
             return false;
         }
 
+        this.pushHistorySnapshot();
+
         const player = this.state.currentPlayer;
         this.state.board[position] = player;
         
@@ -245,12 +255,6 @@ class Game {
             this.state.player2Pieces--;
             this.state.player2PiecesOnBoard++;
         }
-
-        this.state.history.push({
-            type: 'place',
-            player: player,
-            position: position
-        });
 
         if (this.formsMill(player, position)) {
             this.state.millFormed = true;
@@ -277,15 +281,10 @@ class Game {
             if (!adj.includes(to)) return false;
         }
 
+        this.pushHistorySnapshot();
+
         this.state.board[from] = EMPTY;
         this.state.board[to] = player;
-
-        this.state.history.push({
-            type: 'move',
-            player: player,
-            from: from,
-            to: to
-        });
 
         if (this.formsMill(player, to)) {
             this.state.millFormed = true;
@@ -313,6 +312,8 @@ class Game {
             if (!removable.includes(position)) return false;
         }
 
+        this.pushHistorySnapshot();
+
         this.state.board[position] = EMPTY;
         
         if (this.state.phase === PHASE_PLACING) {
@@ -324,12 +325,6 @@ class Game {
         } else {
             this.state.player2PiecesOnBoard--;
         }
-
-        this.state.history.push({
-            type: 'remove',
-            player: player,
-            position: position
-        });
 
         this.state.millFormed = false;
         this.state.removePiece = null;
@@ -417,42 +412,14 @@ class Game {
     undo() {
         if (this.state.history.length === 0) return false;
 
-        const lastMove = this.state.history.pop();
-        
-        if (lastMove.type === 'place') {
-            this.state.board[lastMove.position] = EMPTY;
-            if (lastMove.player === PLAYER_1) {
-                this.state.player1Pieces++;
-                this.state.player1PiecesOnBoard--;
-            } else {
-                this.state.player2Pieces++;
-                this.state.player2PiecesOnBoard--;
-            }
-            this.state.phase = PHASE_PLACING;
-            this.state.blockedPositions = this.state.blockedPositions.filter(p => p !== lastMove.position);
-            this.state.currentPlayer = lastMove.player;
-        } else if (lastMove.type === 'move') {
-            this.state.board[lastMove.from] = lastMove.player;
-            this.state.board[lastMove.to] = EMPTY;
-            this.state.phase = PHASE_MOVING;
-            this.state.currentPlayer = lastMove.player;
-        } else if (lastMove.type === 'remove') {
-            const opponent = lastMove.player === PLAYER_1 ? PLAYER_2 : PLAYER_1;
-            this.state.board[lastMove.position] = opponent;
-            if (opponent === PLAYER_1) {
-                this.state.player1PiecesOnBoard++;
-            } else {
-                this.state.player2PiecesOnBoard++;
-            }
-            this.state.millFormed = true;
-            this.state.removePiece = lastMove.player;
-            this.state.blockedPositions = this.state.blockedPositions.filter(p => p !== lastMove.position);
-            this.state.currentPlayer = lastMove.player;
-        }
+        const snapshot = this.state.history.pop();
+        const remainingHistory = [...this.state.history];
 
-        this.gameOver = false;
-        this.winner = null;
-        
+        this.state = snapshot.state.clone(false);
+        this.state.history = remainingHistory;
+        this.gameOver = snapshot.gameOver;
+        this.winner = snapshot.winner;
+
         return true;
     }
 

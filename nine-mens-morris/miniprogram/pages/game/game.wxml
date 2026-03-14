@@ -60,15 +60,15 @@
 
     <view class="game-controls">
       <button class="control-btn" bindtap="onNewGame">
-        <text class="btn-icon">&#x21bb;</text>
+        <text class="btn-icon">{{icons.newGame}}</text>
         <text class="btn-text">新游戏</text>
       </button>
       <button class="control-btn" bindtap="onThemeMenu">
-        <text class="btn-icon">&#x2726;</text>
+        <text class="btn-icon">{{icons.theme}}</text>
         <text class="btn-text">风格</text>
       </button>
       <button class="control-btn" bindtap="onUndo">
-        <text class="btn-icon">&#x21b6;</text>
+        <text class="btn-icon">{{icons.undo}}</text>
         <text class="btn-text">悔棋</text>
       </button>
     </view>
@@ -96,7 +96,7 @@
       </view>
 
       <button class="start-btn" bindtap="onConfirmStart">
-        <text class="btn-icon start-icon">&#x25b6;</text>
+        <text class="btn-icon start-icon">{{icons.start}}</text>
         <text class="btn-text">开始游戏</text>
       </button>
     </view>
@@ -114,7 +114,7 @@
         <view class="winner-title">{{winnerTitle}}</view>
         <view class="winner-subtitle">{{winnerSubtitle}}</view>
         <button class="restart-btn" bindtap="onRestart">
-          <text class="btn-icon restart-icon">&#x27f2;</text>
+          <text class="btn-icon restart-icon">{{icons.restart}}</text>
           <text class="btn-text">再来一局</text>
         </button>
       </view>
